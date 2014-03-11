@@ -1,0 +1,11 @@
+A set of Brainfuck interpreters in different styles.
+
+switch-interpreter - The usual switch statement loop.
+indirect-interpreter - Indirect lookup of a computed goto.
+direct-interpreter - Direct lookup of a computed goto.
+toc-interpreter - Emits a C program.
+
+Contents of other/ and programs/ not written by me.
+
+TODO - A code-copying JIT interpreter.
+TODO - An optimizing JIT interpreter.

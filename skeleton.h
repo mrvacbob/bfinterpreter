@@ -10,6 +10,7 @@
 #define DEFAULT_TAPE_SIZE 4*1024*1024
 #define MAX_INSTRUCTIONS 262144
 #define MAX_LOOP_DEPTH 256
+#define NO_PRINT_IR
 
 #ifdef __GNUC__
 #define noreturn __attribute__((noreturn))
@@ -161,8 +162,10 @@ static size_t parse_repeat(FILE *src, int first_i, char neg_c, char pos_c, insn_
 	}
 	*next_i = c;
 	
-	if (!start) return 0;
-	else if (abs(start) == 1) {
+	if (!start) {
+		*inst = No_Op;
+		return 0;
+	} else if (abs(start) == 1) {
 		*inst = (start == -1) ? neg1_i : pos1_i;
 		return 0;
 	}
@@ -193,7 +196,7 @@ static void parse(FILE *src)
 		switch (c) {
 			case '<': case '>':
 				val = parse_repeat(src, c, '<', '>', Op_PtrLeft, Op_PtrLeft1, Op_PtrRight, Op_PtrRight1, &tmp_inst, &c);
-				pushinst(tmp_inst);
+				if (tmp_inst != No_Op) pushinst(tmp_inst);
 				if (val) {o.off = val; pushval();}
 				goto reparse;				
 				break;

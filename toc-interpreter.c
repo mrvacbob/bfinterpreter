@@ -1,5 +1,4 @@
 #define NO_JNZ
-#define NO_PRINT_IR
 #include "skeleton.h"
 
 static void emit_c()
@@ -24,8 +23,8 @@ static void emit_c()
 			def(Inc1, "(*tape)++")
 			defv(Dec, "(*tape) -= %u")
 			def(Dec1, "(*tape)--")
-			def(Putchar, "putchar(*tape)")
-			def(Getchar, "*tape = getchar()")
+			def(Putchar, "putchar_unlocked(*tape)")
+			def(Getchar, "*tape = getchar_unlocked()")
 			defb(Jz, "while (*tape) {")
 			defb(Jmp, "}")
 			def(Set0, "(*tape) = 0")

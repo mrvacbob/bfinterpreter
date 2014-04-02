@@ -123,8 +123,8 @@ static void print_ir()
 		switch (inst_types[op]) {
 			case Oper_None: printf("\n"); break;
 			case Oper_Ptr:  
-			case Oper_Cell: printf("%lu\n", val[val_i++].off); break;
-			case Oper_Jump: {jump_rec *r = &val[val_i++].rec; printf("(%d, %d, =%s)\n", r->ip - insts, r->op - vals, insn_strs[decompile(*r->ip)]);} break;
+			case Oper_Cell: printf("%u\n", val[val_i++].off); break;
+			case Oper_Jump: {jump_rec *r = &val[val_i++].rec; printf("(%d, %d, =%s)\n", (int)(r->ip - insts), (int)(r->op - vals), insn_strs[decompile(*r->ip)]);} break;
 		}
 		
 		inst_i++;

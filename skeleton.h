@@ -181,10 +181,10 @@ static void parse(FILE *src)
 	jump_rec r;
 	jump_rec loops[MAX_LOOP_DEPTH];
 	
-#define pushinst(name) {insts[inst_i++] = compile(name); if (inst_i >= MAX_INSTRUCTIONS) die("program too long");}
-#define pushval() {vals[val_i++] = o; if (val_i >= MAX_INSTRUCTIONS) die("program too long");}
-#define pushloop() {if (loop_i >= MAX_LOOP_DEPTH) die("too many loops"); loops[++loop_i] = r;}
-#define cur_pc() (jump_rec){&insts[inst_i], &vals[val_i]}
+#define pushinst(name)	{insts[inst_i++] = compile(name); if (inst_i >= MAX_INSTRUCTIONS) die("program too long");}
+#define pushval() 		{vals[val_i++] = o; if (val_i >= MAX_INSTRUCTIONS) die("program too long");}
+#define pushloop()		{if (loop_i >= MAX_LOOP_DEPTH) die("too many loops"); loops[++loop_i] = r;}
+#define cur_pc()		(jump_rec){&insts[inst_i], &vals[val_i]}
 	
 	while (1) {
 		c = fgetc(src);
@@ -228,16 +228,16 @@ static void parse(FILE *src)
 					val_i--;
 					pushinst(Op_Set0);
 				} else {
-					#ifndef NO_JNZ
+#ifndef NO_JNZ
 					//jmp to x = jnz to x+1
 					pushinst(Op_Jnz);
 					pushval();
 					vals[val_i-1].rec.ip++;
 					vals[val_i-1].rec.op++;
-					#else
+#else
 					pushinst(Op_Jmp);
 					pushval();
-					#endif
+#endif
 					o.rec.op->rec = cur_pc();
 				}
 				break;
@@ -248,9 +248,9 @@ static void parse(FILE *src)
 	
 	if (loop_i > -1) die("unclosed loop");
 	
-	#ifndef NO_PRINT_IR
+#ifndef NO_PRINT_IR
 	print_ir();
-	#endif
+#endif
 }
 
 static time_t timeval_to_us(struct timeval *tv)

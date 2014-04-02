@@ -1,7 +1,9 @@
 #!/bin/sh
 
 CC="gcc"
-CFLAGS="-O3 -mdynamic-no-pic -g -fwhole-program"
+CFLAGS="-O3 -g"
+
+mkdir -p bin
 
 for f in switch direct indirect toc; do
 	$CC -o bin/$f $CFLAGS $f-interpreter.c

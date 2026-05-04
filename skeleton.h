@@ -219,10 +219,12 @@ static void parse(FILE *src)
 				val = parse_repeat(src, c, '-', '+', Op_Dec, Op_Dec1, Op_Inc, Op_Inc1, &tmp_inst, &c);
 				if (inst_i >= 1 && insts[inst_i-1] == compile(Op_Set0)) {
 					inst_i--;
-					if (tmp_inst == Op_Inc1) {pushinst(Op_Set1);}
-					else if (tmp_inst == Op_Inc) {pushinst(Op_Set);}
-					else if (tmp_inst == Op_Dec) {pushinst(Op_Set); val = -val;}
-				} else {pushinst(tmp_inst);}
+					if      (tmp_inst == Op_Inc1) {pushinst(Op_Set1);}
+					else if (tmp_inst == Op_Inc)  {pushinst(Op_Set);}
+					else if (tmp_inst == Op_Dec)  {pushinst(Op_Set); val = -val;}
+					else if (tmp_inst == Op_Dec1) {pushinst(Op_Set); val = (uint8_t)-1;}
+					else if (tmp_inst == No_Op)   {pushinst(Op_Set0);}
+				} else {if (tmp_inst != No_Op) pushinst(tmp_inst);}
 				if (val) {o.off = val; pushval();}
 				goto reparse;
 				break;

@@ -27,8 +27,8 @@ static void execute()
 	instruction *inst = insts;
 	value *val = vals, *o = val;
 
-#define check_right()	if (unlikely(tape < tape_begin || tape >= tape_end)) {die("tape fell off the right side");}
-#define check_left()	if (unlikely(tape < tape_begin || tape >= tape_end)) {die("tape fell off the left side");}
+#define check_right(n)	if (unlikely((size_t)(tape_end - tape) <= (n))) die("tape fell off the right side")
+#define check_left(n)	if (unlikely((n) > (size_t)(tape - tape_begin))) die("tape fell off the left side")
 #define value()			o = val++;	
 #define jmp()			{inst = o->rec.ip; val = o->rec.op;}
 #define next()			{COUNT_INSN(); goto *labels[*inst++];}

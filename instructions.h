@@ -13,10 +13,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-Inst(PtrRight, {value(); tape += o->off; check_right();})
-Inst(PtrRight1, {tape++; check_right();})
-Inst(PtrLeft, {value(); tape -= o->off; check_left();})
-Inst(PtrLeft1, {tape--; check_left();})
+Inst(PtrRight, {value(); check_right(o->off); tape += o->off;})
+Inst(PtrRight1, {check_right(1); tape++;})
+Inst(PtrLeft, {value(); check_left(o->off); tape -= o->off;})
+Inst(PtrLeft1, {check_left(1); tape--;})
 Inst(Inc, {value(); *tape += o->off;})
 Inst(Inc1, {(*tape)++;})
 Inst(Dec, {value(); *tape -= o->off;})

@@ -201,7 +201,7 @@ static void parse(FILE *src)
 	
 #define pushinst(name)	{insts[inst_i++] = compile(name); if (inst_i >= MAX_INSTRUCTIONS) die("program too long");}
 #define pushval() 		{vals[val_i++] = o; if (val_i >= MAX_INSTRUCTIONS) die("program too long");}
-#define pushloop()		{if (loop_i >= MAX_LOOP_DEPTH) die("too many loops"); loops[++loop_i] = r;}
+#define pushloop()		{if ((loop_i + 1) >= MAX_LOOP_DEPTH) die("too many loops"); loops[++loop_i] = r;}
 #define cur_pc()		(jump_rec){&insts[inst_i], &vals[val_i]}
 	
 	while (1) {
@@ -217,7 +217,7 @@ static void parse(FILE *src)
 				break;
 			case '-': case '+':
 				val = parse_repeat(src, c, '-', '+', Op_Dec, Op_Dec1, Op_Inc, Op_Inc1, &tmp_inst, &c);
-				if (insts[inst_i-1] == compile(Op_Set0)) {
+				if (inst_i >= 1 && insts[inst_i-1] == compile(Op_Set0)) {
 					inst_i--;
 					if (tmp_inst == Op_Inc1) {pushinst(Op_Set1);}
 					else if (tmp_inst == Op_Inc) {pushinst(Op_Set);}
@@ -239,9 +239,10 @@ static void parse(FILE *src)
 				pushval();
 				break;
 			case ']':
+				if (loop_i < 0) die("unmatched ']'");
 				o.rec = loops[loop_i--];
 
-				if (insts[inst_i-1] == compile(Op_Dec1) && insts[inst_i-2] == compile(Op_Jz)) {
+				if (inst_i >= 2 && insts[inst_i-1] == compile(Op_Dec1) && insts[inst_i-2] == compile(Op_Jz)) {
 					inst_i -= 2;
 					val_i--;
 					pushinst(Op_Set0);

@@ -27,6 +27,7 @@ import Data.Word
 import Data.Map (Map)
 import qualified Data.Map as Map
 import System.Environment
+import System.Exit
 import System.IO
 
 type Jumps = Map Int Int
@@ -53,16 +54,17 @@ compile' :: ByteString -> Int -> [(Int,Int)] -> [Int] -> [(Int,Int)]
 compile' bf pos jumps stack = let
 	ch = chr8 $ bf `B.index` pos
 	bflen = B.length bf
-	stackPush = pos:stack
-	lastL:stackPop = stack
-	moreJumps = jumps ++ [(lastL,pos+1),(pos,lastL+1)]
 	pos1 = pos+1
 	next = case ch of
-		'[' -> compile' bf pos1 jumps stackPush
-		']' -> compile' bf pos1 moreJumps stackPop
-		otherwise -> compile' bf pos1 jumps stack
+		'[' -> compile' bf pos1 jumps (pos:stack)
+		']' -> case stack of
+			[] -> error "unmatched ']'"
+			lastL:stackPop -> compile' bf pos1 ((lastL,pos+1) : (pos,lastL+1) : jumps) stackPop
+		_ -> compile' bf pos1 jumps stack
 	in
-	if (pos < bflen) then next else jumps
+	if (pos < bflen) then next
+	else if null stack then jumps
+	else error "unclosed '['"
 
 compile :: ByteString -> Prog
 compile bf = (bf,Map.fromList $ compile' bf 0 [] [])
@@ -99,7 +101,7 @@ execute prog@(text,jumps) state@(cells,ptr,pc) = let
 			',' -> ioAct $ getChar >>= setc
 			'[' -> jump (\c -> c == 0)
 			']' -> jump (\c -> c /= 0)
-			otherwise -> next
+			_ -> next
 	in
 	if (pc < insns) then exec else return ()
 	
@@ -111,6 +113,9 @@ runBF bf = do
 
 main = do
 	args <- getArgs
-	bf <- B.readFile $ head args
-	hSetBuffering stdout NoBuffering
-	runBF bf
+	case args of
+		[]       -> die "usage: haskell-interpreter file.bf"
+		(path:_) -> do
+			bf <- B.readFile path
+			hSetBuffering stdout NoBuffering
+			runBF bf

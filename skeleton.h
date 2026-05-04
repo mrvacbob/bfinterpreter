@@ -25,15 +25,12 @@
 #define DEFAULT_TAPE_SIZE 4*1024*1024
 #define MAX_INSTRUCTIONS 262144
 #define MAX_LOOP_DEPTH 256
-#define NO_PRINT_IR
 
 #ifdef __GNUC__
 #define noreturn __attribute__((noreturn))
-#define cold __attribute__((cold))
 #define unlikely(x) __builtin_expect((x), 0)
 #else
 #define noreturn
-#define cold
 #define unlikely(x) (x)
 #endif
 
@@ -71,11 +68,15 @@ typedef enum insn_name {
 #ifdef INSTRUCTION_TYPE
 typedef INSTRUCTION_TYPE instruction;
 static instruction compile(insn_name i);
+#ifdef DEBUG_IR
 static insn_name decompile(instruction i);
+#endif
 #else
 typedef insn_name instruction;
 static instruction compile(insn_name i) {return i;}
+#ifdef DEBUG_IR
 static insn_name decompile(instruction i) {return i;}
+#endif
 #endif
 
 typedef struct jump_rec {
@@ -110,13 +111,8 @@ static cell tapebuf[DEFAULT_TAPE_SIZE] = {0};
 static instruction insts[MAX_INSTRUCTIONS];
 static value vals[MAX_INSTRUCTIONS];
 
-static unsigned insts_executed = 0;
+static int64_t insts_executed = 0;
 #define COUNT_INSN() insts_executed++
-
-static void *zalloc(int size)
-{
-	return calloc(size, 1);
-}
 
 static void noreturn die(const char *err)
 {
@@ -124,6 +120,7 @@ static void noreturn die(const char *err)
 	abort();
 }
 
+#ifdef DEBUG_IR
 static void print_ir()
 {
 	insn_name op;
@@ -146,6 +143,7 @@ static void print_ir()
 		inst_i++;
 	} while (op != Op_Return);
 }
+#endif
 
 static int is_op(int c)
 {
@@ -163,10 +161,10 @@ static int is_op(int c)
 	}
 }
 
-static size_t parse_repeat(FILE *src, int first_i, char neg_c, char pos_c, insn_name neg_i, insn_name neg1_i, insn_name pos_i, insn_name pos1_i, insn_name *inst, int *next_i)
+static int parse_repeat(FILE *src, int first_i, char neg_c, char pos_c, insn_name neg_i, insn_name neg1_i, insn_name pos_i, insn_name pos1_i, insn_name *inst, int *next_i)
 {
 	int c;
-	ssize_t start = (first_i==neg_c)?-1:1;
+	int start = (first_i==neg_c)?-1:1;
 	
 	while (1) {
 		c = fgetc(src);
@@ -181,10 +179,10 @@ static size_t parse_repeat(FILE *src, int first_i, char neg_c, char pos_c, insn_
 		*inst = No_Op;
 		return 0;
 	} else if (abs(start) == 1) {
-		*inst = (start == -1) ? neg1_i : pos1_i;
+		*inst = (start < 0) ? neg1_i : pos1_i;
 		return 0;
 	}
-	
+
 	*inst = (start < 0) ? neg_i : pos_i;
 	return abs(start);
 }
@@ -193,7 +191,7 @@ static void parse(FILE *src)
 {
 	int c;
 	int inst_i = 0, val_i = 0, loop_i = -1;
-	size_t val;
+	int val;
 	insn_name tmp_inst = Op_Return;
 	value o;
 	jump_rec r;
@@ -269,34 +267,36 @@ static void parse(FILE *src)
 	
 	if (loop_i > -1) die("unclosed loop");
 	
-#ifndef NO_PRINT_IR
+#ifdef DEBUG_IR
 	print_ir();
 #endif
 }
 
-static time_t timeval_to_us(struct timeval *tv)
+#ifndef NO_BENCHMARK
+static int64_t timeval_to_us(struct timeval *tv)
 {
     return tv->tv_sec * 1000000 + tv->tv_usec;
 }
 
-static time_t benchmark(time_t last_time, unsigned task_count, const char *label, const char *task_name_plural)
+static int64_t benchmark(int64_t last_time, int64_t task_count, const char *label, const char *task_name_plural)
 {
     struct rusage rusage;
-    time_t time;
-    
+    int64_t time;
+
     getrusage(RUSAGE_SELF, &rusage);
-    
+
     time = timeval_to_us(&rusage.ru_utime) + timeval_to_us(&rusage.ru_stime);
-    
+
     if (last_time) {
         float seconds = (time - last_time) / 1000000.;
         fprintf(stderr, "\n%s took %fs (%f %s/sec)\n", label, seconds, task_count / seconds, task_name_plural);
     }
-    
+
     return time;
 }
 
-static time_t benchmark_start()
+static int64_t benchmark_start()
 {
-    return benchmark(0, 1, "", ""); // :shobon:
+    return benchmark(0, 1, "", "");
 }
+#endif

@@ -45,7 +45,7 @@ out:
 int main(int argc, char *argv[])
 {
 	FILE *src;
-	time_t time;
+	int64_t time;
 
 	if (argc < 2) errx(EX_USAGE, "usage: %s file.bf", argv[0]);
 

@@ -14,6 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #define NO_JNZ
+#define NO_BENCHMARK
 #include <err.h>
 #include <sysexits.h>
 #include "skeleton.h"

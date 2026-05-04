@@ -290,8 +290,7 @@ static time_t benchmark(time_t last_time, unsigned task_count, const char *label
     
     if (last_time) {
         float seconds = (time - last_time) / 1000000.;
-        system("clear"); // :shobon: x10
-        printf("\n%s took %fs (%f %s/sec)\n", label, seconds, task_count / seconds, task_name_plural);
+        fprintf(stderr, "\n%s took %fs (%f %s/sec)\n", label, seconds, task_count / seconds, task_name_plural);
     }
     
     return time;

@@ -14,6 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #define NO_JNZ
+#include <err.h>
+#include <sysexits.h>
 #include "skeleton.h"
 
 static void emit_c()
@@ -57,11 +59,11 @@ out:
 int main(int argc, char *argv[])
 {
 	FILE *src;
-	time_t time;
 
-	if (argc < 2) return 1;
+	if (argc < 2) errx(EX_USAGE, "usage: %s file.bf", argv[0]);
 
 	src = fopen(argv[1], "r");
+	if (!src) err(EX_NOINPUT, "%s", argv[1]);
 	parse(src);
 	fclose(src);
 

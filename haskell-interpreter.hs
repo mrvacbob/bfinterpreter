@@ -26,9 +26,11 @@ import qualified Data.ByteString as B
 import Data.Word
 import Data.Map (Map)
 import qualified Data.Map as Map
+import Control.Exception
 import System.Environment
 import System.Exit
 import System.IO
+import System.IO.Error (ioeGetErrorString)
 
 type Jumps = Map Int Int
 type Bytes = IOUArray Int Word8
@@ -116,6 +118,7 @@ main = do
 	case args of
 		[]       -> die "usage: haskell-interpreter file.bf"
 		(path:_) -> do
-			bf <- B.readFile path
+			bf <- B.readFile path `catch` \(e :: IOException) ->
+				die (path ++ ": " ++ ioeGetErrorString e)
 			hSetBuffering stdout NoBuffering
 			runBF bf

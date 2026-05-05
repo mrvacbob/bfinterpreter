@@ -24,7 +24,7 @@ static void emit_c()
 	instruction *inst = insts;
 	value *val = vals;
 
-	puts("#include <stdio.h>\n#include <inttypes.h>\n\n#define DEFAULT_TAPE_SIZE 4*1024*1024\n\ntypedef uint8_t cell;\n\nstatic cell tapebuf[DEFAULT_TAPE_SIZE] = {0};\n\nint main(int argc, char *argv[])\n{\n\tcell *tape = tapebuf;\n");
+	puts("#include <stdio.h>\n#include <inttypes.h>\n\n#define DEFAULT_TAPE_SIZE 4*1024*1024\n\ntypedef uint8_t cell;\n\nstatic cell tapebuf[DEFAULT_TAPE_SIZE] = {0};\n\nint main(void)\n{\n\tcell *tape = tapebuf;\n");
 
 #define  def(n, v) case Op_##n: printf("\t" v ";\n"); break;
 #define defb(n, v) case Op_##n: printf("\t" v  "\n"); val++; break;

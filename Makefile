@@ -1,9 +1,13 @@
 CC     = gcc
+GHC    = ghc
 CFLAGS = -O3 -g -Wall -MMD -MP
 
-INTERPS = bin/switch bin/direct bin/indirect bin/toc
+INTERPS = bin/switch bin/direct bin/indirect bin/toc bin/haskell
 
 all: $(INTERPS)
+
+bin/haskell: haskell-interpreter.hs | bin
+	$(GHC) -O2 -o $@ $<
 
 bin/%: %-interpreter.c skeleton.h instructions.h | bin
 	$(CC) $(CFLAGS) -MF $@.d -o $@ $<
@@ -14,12 +18,12 @@ bin:
 -include $(wildcard bin/*.d)
 
 clean:
-	rm -f $(INTERPS) bin/*.d
+	rm -f $(INTERPS) bin/*.d haskell-interpreter.o haskell-interpreter.hi
 
 # Smoke-test: run each interpreter on helloworld.bf and verify output.
 # toc emits C, so compile and run the result.
 check: $(INTERPS)
-	@for interp in switch direct indirect; do \
+	@for interp in switch direct indirect haskell; do \
 	    if bin/$$interp programs/helloworld.bf 2>/dev/null | grep -q "Hello World!"; then \
 	        echo "PASS: $$interp"; \
 	    else \

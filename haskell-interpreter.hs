@@ -96,7 +96,7 @@ execute prog@(text,jumps) state@(cells,ptr,pc) = let
 			'>' -> ptrIncDec 1
 			'<' -> ptrIncDec (-1) 
 			'+' -> ioAct $ cellIncDec 1
-			'-' -> ioAct $ cellIncDec (-1)
+			'-' -> ioAct $ cellIncDec 255
 			'.' -> ioAct $ putc
 			',' -> ioAct $ getChar >>= setc
 			'[' -> jump (\c -> c == 0)

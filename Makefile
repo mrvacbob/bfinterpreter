@@ -7,7 +7,7 @@ INTERPS = bin/switch bin/direct bin/indirect bin/toc bin/haskell
 all: $(INTERPS)
 
 bin/haskell: haskell-interpreter.hs | bin
-	$(GHC) -O2 -o $@ $<
+	$(GHC) -O2 -g2 -package-env - -o $@ $<
 
 bin/%: %-interpreter.c skeleton.h instructions.h | bin
 	$(CC) $(CFLAGS) -MF $@.d -o $@ $<
